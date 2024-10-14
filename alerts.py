@@ -23,7 +23,6 @@ def create_weather_alerts_csv(filename=None):
         
         # Extraction des coordonnées si la géométrie n'est pas nulle
         coordinates = []
-        print(geometry)
         if geometry :
             coordinates = geometry['coordinates'][0]
         
