@@ -19,6 +19,14 @@ def create_weather_alerts_csv(filename=None):
     alerts = []
     for feature in data['features']:
         properties = feature['properties']
+        geometry = feature.get('geometry')
+        
+        # Extraction des coordonnées si la géométrie n'est pas nulle
+        coordinates = []
+        print(geometry)
+        if geometry :
+            coordinates = geometry['coordinates'][0]
+        
         alert = {
             'id': properties['id'],
             'areaDesc': properties['areaDesc'],
@@ -38,7 +46,9 @@ def create_weather_alerts_csv(filename=None):
             'urgency': properties['urgency'],
             'event': properties['event'],
             'headline': properties['headline'],
+            'coordinates': json.dumps(coordinates)  # Stockage des coordonnées en tant que chaîne JSON
         }
+        
         alerts.append(alert)
 
     # Génération du nom de fichier si non fourni
@@ -57,4 +67,3 @@ def create_weather_alerts_csv(filename=None):
 
     print(f"Les alertes ont été enregistrées dans {filename}")
     return filename
-
