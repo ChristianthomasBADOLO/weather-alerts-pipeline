@@ -7,39 +7,6 @@ from alerts import create_weather_alerts_csv
 # Load environment variables
 load_dotenv()
 
-# def create_snowflake_objects():
-#     """Creates the warehouse, database, and schema in Snowflake"""
-#     # Initial connection to Snowflake (without specifying database and schema)
-#     conn = snowflake.connector.connect(
-#         account=os.getenv('account'),
-#         user=os.getenv('user'),
-#         password=os.getenv('password')
-#     )
-    
-#     try:
-#         with conn.cursor() as cur:
-#             # Create warehouse
-#             cur.execute("""
-#             CREATE WAREHOUSE IF NOT EXISTS WEATHER_WAREHOUSE
-#             WITH WAREHOUSE_SIZE = 'XSMALL'
-#             AUTO_SUSPEND = 300
-#             AUTO_RESUME = TRUE
-#             """)
-            
-#             # Create database
-#             cur.execute("CREATE DATABASE IF NOT EXISTS WEATHER_DATA")
-            
-#             # Use database
-#             cur.execute("USE DATABASE WEATHER_DATA")
-            
-#             # Create schema
-#             cur.execute("CREATE SCHEMA IF NOT EXISTS WEATHER_SCHEMA")
-            
-#         print("Warehouse, Database, and Schema created successfully")
-        
-#     finally:
-#         conn.close()
-
 def create_weather_alerts_snowflake():
     # Create Snowflake objects
     # create_snowflake_objects()
