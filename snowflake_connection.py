@@ -11,7 +11,43 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
+def create_snowflake_objects():
+    """Crée le warehouse, la database et le schema dans Snowflake"""
+    # Connexion initiale à Snowflake (sans spécifier database et schema)
+    conn = snowflake.connector.connect(
+        account=os.getenv('SNOWFLAKE_ACCOUNT'),
+        user=os.getenv('SNOWFLAKE_USER'),
+        password=os.getenv('SNOWFLAKE_PASSWORD')
+    )
+    
+    try:
+        with conn.cursor() as cur:
+            # Création du warehouse
+            cur.execute("""
+            CREATE WAREHOUSE IF NOT EXISTS WEATHER_WAREHOUSE
+            WITH WAREHOUSE_SIZE = 'XSMALL'
+            AUTO_SUSPEND = 300
+            AUTO_RESUME = TRUE
+            """)
+            
+            # Création de la base de données
+            cur.execute("CREATE DATABASE IF NOT EXISTS WEATHER_DATA")
+            
+            # Utilisation de la base de données
+            cur.execute("USE DATABASE WEATHER_DATA")
+            
+            # Création du schéma
+            cur.execute("CREATE SCHEMA IF NOT EXISTS WEATHER_SCHEMA")
+            
+        print("Warehouse, Database et Schema créés avec succès")
+        
+    finally:
+        conn.close()
+
 def create_weather_alerts_snowflake():
+    # Création des objets Snowflake
+    create_snowflake_objects()
+    
     BASE_URL = os.getenv('API_BASE_URL')
     alerts_url = f"{BASE_URL}/alerts/active"
 
@@ -61,14 +97,14 @@ def create_weather_alerts_snowflake():
     # Création d'un DataFrame pandas
     df = pd.DataFrame(alerts)
 
-    # Connexion à Snowflake
+    # Connexion à Snowflake avec les nouveaux objets créés
     conn = snowflake.connector.connect(
         account=os.getenv('SNOWFLAKE_ACCOUNT'),
         user=os.getenv('SNOWFLAKE_USER'),
         password=os.getenv('SNOWFLAKE_PASSWORD'),
-        warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
-        database=os.getenv('SNOWFLAKE_DATABASE'),
-        schema=os.getenv('SNOWFLAKE_SCHEMA')
+        warehouse='WEATHER_WAREHOUSE',
+        database='WEATHER_DATA',
+        schema='WEATHER_SCHEMA'
     )
 
     try:
