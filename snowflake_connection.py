@@ -1,28 +1,24 @@
-import csv
-import json
-import requests
-from datetime import datetime
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
-import pandas as pd
 import os
 from dotenv import load_dotenv
+from alerts import create_weather_alerts_csv
 
-# Charger les variables d'environnement
+# Load environment variables
 load_dotenv()
 
 def create_snowflake_objects():
-    """Crée le warehouse, la database et le schema dans Snowflake"""
-    # Connexion initiale à Snowflake (sans spécifier database et schema)
+    """Creates the warehouse, database, and schema in Snowflake"""
+    # Initial connection to Snowflake (without specifying database and schema)
     conn = snowflake.connector.connect(
-        account=os.getenv('SNOWFLAKE_ACCOUNT'),
-        user=os.getenv('SNOWFLAKE_USER'),
-        password=os.getenv('SNOWFLAKE_PASSWORD')
+        account=os.getenv('account'),
+        user=os.getenv('user'),
+        password=os.getenv('password')
     )
     
     try:
         with conn.cursor() as cur:
-            # Création du warehouse
+            # Create warehouse
             cur.execute("""
             CREATE WAREHOUSE IF NOT EXISTS WEATHER_WAREHOUSE
             WITH WAREHOUSE_SIZE = 'XSMALL'
@@ -30,114 +26,69 @@ def create_snowflake_objects():
             AUTO_RESUME = TRUE
             """)
             
-            # Création de la base de données
+            # Create database
             cur.execute("CREATE DATABASE IF NOT EXISTS WEATHER_DATA")
             
-            # Utilisation de la base de données
+            # Use database
             cur.execute("USE DATABASE WEATHER_DATA")
             
-            # Création du schéma
+            # Create schema
             cur.execute("CREATE SCHEMA IF NOT EXISTS WEATHER_SCHEMA")
             
-        print("Warehouse, Database et Schema créés avec succès")
+        print("Warehouse, Database, and Schema created successfully")
         
     finally:
         conn.close()
 
 def create_weather_alerts_snowflake():
-    # Création des objets Snowflake
+    # Create Snowflake objects
     create_snowflake_objects()
-    
-    BASE_URL = os.getenv('API_BASE_URL')
-    alerts_url = f"{BASE_URL}/alerts/active"
+    alerts = create_weather_alerts_csv()
 
-    # Récupération des alertes
-    response = requests.get(alerts_url)
-    if response.status_code != 200:
-        print(f"Erreur lors de la récupération des alertes: {response.status_code}")
-        return None
+    # Convert all column names to uppercase
+    alerts.columns = alerts.columns.str.upper()
 
-    data = response.json()
-
-    # Traitement des alertes
-    alerts = []
-    for feature in data['features']:
-        properties = feature['properties']
-        geometry = feature.get('geometry')
-        
-        # Extraction des coordonnées si la géométrie n'est pas nulle
-        coordinates = []
-        if geometry:
-            coordinates = geometry['coordinates'][0]
-        
-        alert = {
-            'id': properties['id'],
-            'areaDesc': properties['areaDesc'],
-            'SAME_codes': ','.join(properties.get('geocode', {}).get('SAME', [])),
-            'UGC_codes': ','.join(properties.get('geocode', {}).get('UGC', [])),
-            'affectedZones': ','.join(properties.get('affectedZones', [])),
-            'sent': properties['sent'],
-            'effective': properties['effective'],
-            'onset': properties['onset'],
-            'expires': properties['expires'],
-            'ends': properties['ends'],
-            'status': properties['status'],
-            'messageType': properties['messageType'],
-            'category': properties['category'],
-            'severity': properties['severity'],
-            'certainty': properties['certainty'],
-            'urgency': properties['urgency'],
-            'event': properties['event'],
-            'headline': properties['headline'],
-            'coordinates': json.dumps(coordinates)
-        }
-        
-        alerts.append(alert)
-
-    # Création d'un DataFrame pandas
-    df = pd.DataFrame(alerts)
-
-    # Connexion à Snowflake avec les nouveaux objets créés
+    # Connect to Snowflake with the newly created objects
     conn = snowflake.connector.connect(
-        account=os.getenv('SNOWFLAKE_ACCOUNT'),
-        user=os.getenv('SNOWFLAKE_USER'),
-        password=os.getenv('SNOWFLAKE_PASSWORD'),
+        account=os.getenv('account'),
+        user=os.getenv('user'),
+        password=os.getenv('password'),
         warehouse='WEATHER_WAREHOUSE',
         database='WEATHER_DATA',
         schema='WEATHER_SCHEMA'
     )
 
     try:
-        # Création de la table si elle n'existe pas
+        # Create table if it doesn't exist
         with conn.cursor() as cur:
             cur.execute("""
-            CREATE TABLE IF NOT EXISTS weather_alerts (
-                id STRING,
-                areaDesc STRING,
-                SAME_codes STRING,
-                UGC_codes STRING,
-                affectedZones STRING,
-                sent TIMESTAMP_NTZ,
-                effective TIMESTAMP_NTZ,
-                onset TIMESTAMP_NTZ,
-                expires TIMESTAMP_NTZ,
-                ends TIMESTAMP_NTZ,
-                status STRING,
-                messageType STRING,
-                category STRING,
-                severity STRING,
-                certainty STRING,
-                urgency STRING,
-                event STRING,
-                headline STRING,
-                coordinates STRING
+            CREATE TABLE IF NOT EXISTS WEATHER_ALERTS (
+                ID STRING,
+                AREADESC STRING,
+                SAME_CODES STRING,
+                UGC_CODES STRING,
+                AFFECTEDZONES STRING,
+                SENT TIMESTAMP_NTZ,
+                EFFECTIVE TIMESTAMP_NTZ,
+                ONSET TIMESTAMP_NTZ,
+                EXPIRES TIMESTAMP_NTZ,
+                ENDS TIMESTAMP_NTZ,
+                STATUS STRING,
+                MESSAGETYPE STRING,
+                CATEGORY STRING,
+                SEVERITY STRING,
+                CERTAINTY STRING,
+                URGENCY STRING,
+                EVENT STRING,
+                HEADLINE STRING,
+                COORDINATES STRING
             )
             """)
 
-        # Insertion des données dans Snowflake
-        success, nchunks, nrows, _ = write_pandas(conn, df, 'WEATHER_ALERTS')
+        # Insert data into Snowflake
+        success, nchunks, nrows, _ = write_pandas(conn, alerts, 'WEATHER_ALERTS')
         
-        print(f"Données insérées avec succès dans Snowflake. {nrows} lignes insérées.")
+        print(f"Data inserted successfully into Snowflake. {nrows} rows inserted.")
 
     finally:
         conn.close()
