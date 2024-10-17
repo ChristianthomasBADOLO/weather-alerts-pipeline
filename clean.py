@@ -55,6 +55,6 @@ selected_columns = [
 ]
 
 # Utilisation du script
-input_file = 'weather_alerts_20241014_111433.csv'  # Votre fichier CSV d'origine
+input_file = 'weather_alerts_20241014_141423.csv'  # Votre fichier CSV d'origine
 output_file = 'cleaned_weather_data.csv'  # Le nouveau fichier CSV nettoyé
 clean_csv(input_file, output_file, selected_columns)
