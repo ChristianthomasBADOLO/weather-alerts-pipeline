@@ -1,9 +1,8 @@
-import csv
+import pandas as pd
 import json
 import requests
-from datetime import datetime
 
-def create_weather_alerts_csv(filename=None):
+def create_weather_alerts_csv():
     BASE_URL = "https://api.weather.gov"
     alerts_url = f"{BASE_URL}/alerts/active"
 
@@ -50,19 +49,7 @@ def create_weather_alerts_csv(filename=None):
         
         alerts.append(alert)
 
-    # Génération du nom de fichier si non fourni
-    if filename is None:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"weather_alerts_{timestamp}.csv"
-
-    # Sauvegarde dans un fichier CSV
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = alerts[0].keys()
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        
-        writer.writeheader()
-        for alert in alerts:
-            writer.writerow(alert)
-
-    print(f"Les alertes ont été enregistrées dans {filename}")
-    return filename
+    # Création du DataFrame
+    df = pd.DataFrame(alerts)
+    
+    return df
