@@ -1,0 +1,47 @@
+version: 2
+
+sources:
+  - name: raw
+    database: DBT_DB
+    schema: RAW
+    tables:
+      - name: WEATHER_ALERTS
+        columns:
+          - name: ID
+            description: "Identifiant unique de l'alerte"
+          - name: AREADESC
+            description: "Description de la zone concernée"
+          - name: SAME_CODES
+            description: "Codes SAME (Specific Area Message Encoding)"
+          - name: UGC_CODES
+            description: "Universal Geographic Codes"
+          - name: AFFECTEDZONES
+            description: "Zones affectées par l'alerte"
+          - name: SENT
+            description: "Date d'envoi de l'alerte"
+          - name: EFFECTIVE
+            description: "Date d'entrée en vigueur"
+          - name: ONSET
+            description: "Date de début de l'événement"
+          - name: EXPIRES
+            description: "Date d'expiration"
+          - name: ENDS
+            description: "Date de fin"
+          - name: STATUS
+            description: "Statut de l'alerte"
+          - name: MESSAGETYPE
+            description: "Type de message"
+          - name: CATEGORY
+            description: "Catégorie de l'alerte"
+          - name: SEVERITY
+            description: "Niveau de sévérité"
+          - name: CERTAINTY
+            description: "Niveau de certitude"
+          - name: URGENCY
+            description: "Niveau d'urgence"
+          - name: EVENT
+            description: "Type d'événement météorologique"
+          - name: HEADLINE
+            description: "Titre de l'alerte"
+          - name: COORDINATES
+            description: "Coordonnées géographiques"
