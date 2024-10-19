@@ -5,43 +5,17 @@ sources:
     database: DBT_DB
     schema: RAW
     tables:
-      - name: WEATHER_ALERTS
+      - name: weather_alerts
+        description: "Données brutes des alertes météo de l'API NWS"
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: "SENT <= EFFECTIVE"
         columns:
           - name: ID
-            description: "Identifiant unique de l'alerte"
-          - name: AREADESC
-            description: "Description de la zone concernée"
-          - name: SAME_CODES
-            description: "Codes SAME (Specific Area Message Encoding)"
-          - name: UGC_CODES
-            description: "Universal Geographic Codes"
-          - name: AFFECTEDZONES
-            description: "Zones affectées par l'alerte"
+            data_tests:
+              - unique
+              - not_null
           - name: SENT
-            description: "Date d'envoi de l'alerte"
+            description: "Temps d'envoi de l'alerte"
           - name: EFFECTIVE
-            description: "Date d'entrée en vigueur"
-          - name: ONSET
-            description: "Date de début de l'événement"
-          - name: EXPIRES
-            description: "Date d'expiration"
-          - name: ENDS
-            description: "Date de fin"
-          - name: STATUS
-            description: "Statut de l'alerte"
-          - name: MESSAGETYPE
-            description: "Type de message"
-          - name: CATEGORY
-            description: "Catégorie de l'alerte"
-          - name: SEVERITY
-            description: "Niveau de sévérité"
-          - name: CERTAINTY
-            description: "Niveau de certitude"
-          - name: URGENCY
-            description: "Niveau d'urgence"
-          - name: EVENT
-            description: "Type d'événement météorologique"
-          - name: HEADLINE
-            description: "Titre de l'alerte"
-          - name: COORDINATES
-            description: "Coordonnées géographiques"
+            description: "Temps effectif de l'alerte"

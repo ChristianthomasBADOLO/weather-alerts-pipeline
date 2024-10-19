@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_weather_alerts
+    description: "Vue standardisée des alertes météo"
+    columns:
+      - name: id
+        description: "Identifiant unique de l'alerte"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: status
+        description: "Statut de l'alerte"
+        data_tests:
+          - accepted_values:
+              values: ['Actual', 'Exercise', 'System', 'Test', 'Draft']
+
+      - name: messagetype
+        description: "Type de message"
+        data_tests:
+          - accepted_values:
+              values: ['Alert', 'Update', 'Cancel', 'Ack', 'Error']
+
+      - name: category
+        description: "Catégorie de l'événement"
+        data_tests:
+          - accepted_values:
+              values: ['Met', 'Geo', 'Safety', 'Security', 'Rescue', 'Fire', 'Health', 'Env', 'Transport', 'Infra', 'CBRNE', 'Other']
+
+      - name: severity
+        description: "Niveau de sévérité"
+        data_tests:
+          - accepted_values:
+              values: ['Extreme', 'Severe', 'Moderate', 'Minor', 'Unknown']
+
+      - name: certainty
+        description: "Niveau de certitude"
+        data_tests:
+          - accepted_values:
+              values: ['Observed', 'Likely', 'Possible', 'Unlikely', 'Unknown']
+
+      - name: urgency
+        description: "Niveau d'urgence"
+        data_tests:
+          - accepted_values:
+              values: ['Immediate', 'Expected', 'Future', 'Past', 'Unknown']
+
+      - name: alert_status
+        description: "Statut calculé de l'alerte"
+        data_tests:
+          - accepted_values:
+              values: ['New', 'Updated', 'Cancelled', 'Other']

@@ -1,8 +1,15 @@
+{{
+    config(
+        materialized='view',
+        tags=['staging', 'weather', 'alerts']
+    )
+}}
+
 with source as (
-    select * from {{ source('raw', 'WEATHER_ALERTS') }}
+    select * from {{ source('raw', 'weather_alerts') }}
 ),
 
-renamed as (
+validated as (
     select
         id,
         areadesc,
@@ -22,8 +29,16 @@ renamed as (
         urgency,
         event,
         headline,
-        coordinates
+        coordinates,
+        -- Ajout de champs dérivés utiles
+        datediff('hour', effective, coalesce(ends, expires)) as alert_duration_hours,
+        case 
+            when status = 'Actual' and messagetype = 'Alert' then 'New'
+            when status = 'Actual' and messagetype = 'Update' then 'Updated'
+            when status = 'Actual' and messagetype = 'Cancel' then 'Cancelled'
+            else 'Other'
+        end as alert_status
     from source
 )
 
-select * from renamed
+select * from validated

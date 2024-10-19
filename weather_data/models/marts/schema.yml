@@ -1,0 +1,23 @@
+# version: 2
+
+# models:
+#   - name: alert_daily_summary
+#     description: "Résumé quotidien des alertes météo"
+#     columns:
+#       - name: alert_date
+#         description: "Date de l'alerte"
+#         data_tests:
+#           - not_null
+#           - unique:
+#               where: "event is not null"
+      
+#       - name: event
+#         description: "Type d'événement météo"
+#         data_tests:
+#           - not_null
+      
+#       - name: severity
+#         description: "Niveau de sévérité"
+#         data_tests:
+#           - accepted_values:
+#               values: ['Minor', 'Moderate', 'Severe', 'Extreme']
